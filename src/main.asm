@@ -78,13 +78,28 @@ main:
 
         ; check if enter
         cmp al, 13
-        jne .loop
+        je .enter
 
-        mov si, msg_prompt
-        call print        
-            
-        jmp .loop        
+        ; check if backspace
+        cmp al, 8
+        je .backspace
+
+        jmp .loop
+
+.backspace:
+        mov si, msg_bs
+        call print
         
+        jmp .loop
+
+.enter:
+        mov si, msg_prompt
+        call print
+        
+        jmp .loop        
+
+
+
         hlt
 
 .halt:
@@ -92,6 +107,7 @@ main:
 
 msg_boot_success: db 'Bootloader v0.1.0 ran successfully.', ENDL, 0
 msg_prompt: db ENDL, '> ', 0
+msg_bs: db ' ', 8, 0
 
 times 510-($-$$) db 0
 dw 0AA55h
