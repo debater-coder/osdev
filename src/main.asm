@@ -71,6 +71,8 @@ main:
         
         mov si, msg_prompt
         call print
+
+        mov bx, 0
         
 .loop:
         ; get input
@@ -84,21 +86,40 @@ main:
         cmp al, 8
         je .backspace
 
+        ; check if string overflowed
+        cmp bx, 20
+        jge .loop
+
+        ; add to input_string
+        mov [input_string + bx], al
+        inc bx
+        
         jmp .loop
 
 .backspace:
         mov si, msg_bs
         call print
+
+        dec bx
         
         jmp .loop
 
 .enter:
+        mov si, msg_newline
+        call print
+
+        mov [input_string + bx], word 0
+        
+        mov si, input_string
+        call print
+
+        mov bx, 0
+
+        
         mov si, msg_prompt
         call print
-        
+
         jmp .loop        
-
-
 
         hlt
 
@@ -108,6 +129,8 @@ main:
 msg_boot_success: db 'Bootloader v0.1.0 ran successfully.', ENDL, 0
 msg_prompt: db ENDL, '> ', 0
 msg_bs: db ' ', 8, 0
+msg_newline: db ENDL, 0
+input_string: db '                    ', 0
 
 times 510-($-$$) db 0
 dw 0AA55h
