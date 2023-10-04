@@ -7,8 +7,15 @@ start:
         jmp main
 
 ;
-; Prints help text
+; Terminates system
 ;
+shutdown:
+.hlt:
+        hlt
+        jmp .hlt
+
+;
+; Prints help text
 ;
 help:
         mov si, msg_help
@@ -125,10 +132,19 @@ main:
         mov si, input_string
         mov di, cmd_help
         repe cmpsb
-        jne .unknown
+        jne .shutdown
 
         call help
         jmp .end
+.shutdown:
+        ; check if shutdown
+        mov cx, bx
+        mov si, input_string
+        mov di, cmd_shutdown
+        repe cmpsb
+        jne .unknown
+
+        call shutdown
 
 .unknown:
         mov si, msg_unknown_command
@@ -151,6 +167,7 @@ main:
         jmp .halt
 
 cmd_help: db 'help', 0
+cmd_shutdown: db 'shutdown', 0
 
 msg_boot_success: db 'Bootloader v0.1.0 ran successfully.', ENDL, 0
 msg_prompt: db '> ', 0
