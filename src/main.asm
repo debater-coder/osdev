@@ -7,6 +7,15 @@ start:
         jmp main
 
 ;
+; Prints help text
+;
+;
+help:
+        mov si, msg_help
+        call print
+        ret
+
+;
 ; Get a character of input and echo it to the screen
 ;
 ; Returns:
@@ -109,27 +118,47 @@ main:
         call print
 
         mov [input_string + bx], word 0
-        
+
+.check_help:
+        ; check if help
+        mov cx, bx
+        mov si, input_string
+        mov di, cmd_help
+        repe cmpsb
+        jne .unknown
+
+        call help
+        jmp .end
+
+.unknown:
+        mov si, msg_unknown_command
+        call print
         mov si, input_string
         call print
+        mov si, msg_newline
+        call print
+        jmp .end
 
+.end:
         mov bx, 0
-
-        
         mov si, msg_prompt
         call print
 
         jmp .loop        
 
-        hlt
-
 .halt:
+        hlt
         jmp .halt
 
+cmd_help: db 'help', 0
+
 msg_boot_success: db 'Bootloader v0.1.0 ran successfully.', ENDL, 0
-msg_prompt: db ENDL, '> ', 0
+msg_prompt: db '> ', 0
 msg_bs: db ' ', 8, 0
 msg_newline: db ENDL, 0
+
+msg_help: db 'MyOS v0.1.0', ENDL, ENDL, 'Commands:', ENDL, '    - help: display help', ENDL, '    - shutdown: terminate system', ENDL, 0
+msg_unknown_command: db 'Unknown command: ', 0
 input_string: db '                    ', 0
 
 times 510-($-$$) db 0
